@@ -34,9 +34,71 @@ To deploy your contract onto a testnet, follow these steps:
 1. Update `scripts/DeployContract.js` with the address of your Aave LendingPoolAddressesProvider on the network you are deploying to.
 2. Run the deploy script with `npx hardhat run scripts/DeployContract.js --network <network-name>`
 
-## Testing with Tenderly's Simulation Features
+## Simulating Flashloan Transaction with Tenderly SDK
 
-Once your contract is deployed, you can use Tenderly's simulation features to test it. Connect your project to Tenderly's SDK and run your transaction simulations. 
+After deploying your contract, you can simulate the flash loan operation using Tenderly's SDK before executing it on-chain. To do this:
+
+1. Initialize a new Node.js project and install Tenderly's SDK:
+
+    ```
+    mkdir tenderly-simulation
+    cd tenderly-simulation
+    npm init -y
+    npm install @tenderly/sdk
+    ```
+
+2. Create a new `index.js` file in your project directory and import the Tenderly SDK:
+
+    ```javascript
+    const { Tenderly, Network } = require("@tenderly/sdk");
+    
+    const tenderly = new Tenderly({
+      accountName: "your-account-name",
+      projectName: "your-project-name",
+      accessKey: "your-access-key",
+      network: Network.<network>, // Replace with the appropriate network
+    });
+    ```
+
+3. Define your transaction parameters:
+
+    ```javascript
+    const transactionParameters = {
+      from: "your-account-address",
+      to: "contract-address",
+      input: "encoded-function-call",
+      value: "0",
+      gas: 21000,
+      gas_price: "20000000000",
+    };
+    
+    const simulationDetails = {
+      transaction: transactionParameters,
+      blockNumber: <block-number>, // Optional
+      override: {}, // Optional state override
+    };
+    ```
+
+4. Run the transaction simulation:
+
+    ```javascript
+    (async () => {
+      try {
+        const simulationResult = await tenderly.simulator.simulateTransaction(simulationDetails);
+        console.log("Simulation result:", simulationResult);
+      } catch (error) {
+        console.error("Error running simulation:", error);
+      }
+    })();
+    ```
+
+5. Execute the script:
+
+    ```
+    node index.js
+    ```
+
+If the simulation is successful, you will see the simulation result printed in the console.
 
 ## Conclusion
 
@@ -44,4 +106,4 @@ This starter project provides you with the basic setup for implementing flash lo
 
 ## Disclaimer
 
-Flash loans are powerful but come with risks, especially around smart contract vulnerabilities and market risks. Always ensure thorough testing and auditing before deploying on the mainnet.
+Flash loans are powerful but come with risks, especially around smart contract vulnerabilities and market risks. 
